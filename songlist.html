@@ -1,0 +1,82 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>
+    <style type="text/css">
+        th {
+            cursor: pointer;
+        }
+        th:hover {
+            text-decoration: underline;
+        }
+        td {
+            width: 150px;
+            padding: 10px;
+            border-bottom: 1px dashed #ccc;
+            text-align: center;
+        }
+    </style>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.js"></script>
+    <script type="text/javascript" src="js/api.js"></script>
+    <script type="text/javascript">
+        //wait until the DOM is loaded
+        $(document).ready(function() {
+            //if we set debug to true we would see errors and other information in the console
+            //this should only be set to true during development.  Otherwise, you will cause your code to break in production
+            myHMXSongs = new HMXSongs({debug: false});
+            //show the loading statement while we get the list of songs
+            $('#loading').show();        
+            //make the request to get the list of all songs to display on load
+            myHMXSongs.getSongs({
+                complete: function(data) {
+                    //create the HTML to insert into the page
+                    var listHTML = generateListHTML(data);
+                    //insert the content
+                    $('#content').html(listHTML);
+                    //hide the loading statement
+                    $('#loading').hide();
+                    //show the list
+                    $('#content').show();
+                },
+                //we are going to force a server re-cache to make sure we have the most up-to-date song list.
+                recache: true
+            });
+            
+            /*
+            Function used to generate the HTML to insert into the page from the JSON returned by the server
+            Accepts an array of objects, each object representing a song
+            Generates a table with each song in its own row, with each attribute in its own column
+            */
+            var generateListHTML = function(songList) {
+                var returnHTML = '<table>';
+                //add the table headers
+                returnHTML += '<tr><th>Title</th><th>Artist</th><th>Year</th><th>Genre</th><th>Difficulty</th>';
+                returnHTML += '<th>Type</th><th>Rating</th></tr>';
+                
+                //for each song in the list, we generate the HTML and concatenate it to the return HTML
+                var i = 0;
+                while (i<songList.length) {
+                    var song = songList[i];
+                    returnHTML += '<tr><td>'+song.name+'</td><td>'+song.artist+'</td><td>'+song.year_released+'</td><td>';
+                    returnHTML += song.genre_symbol+'</td><td>'+song.difficulty_band+'</td><td>'+song.source+'</td><td>';
+                    returnHTML += song.rating+'</td></tr>';
+                    i++;
+                }
+                returnHTML += '</table>';
+                //we will also update the number of songs message
+                $('h3 span').html(songList.length);
+                return returnHTML;
+            }            
+        });
+    </script>
+  </head>
+  <body>
+    <h1>SongList Example</h1>
+    <p>This example replicates the song list shown on RockBand.com (showing all songs in the Rockband platform).  JQuery is used for DOM manipulation, however the HMXSongs API is library-agnostic, and the same results could be accomplished using your framework of choice (YUI, Prototype, etc).  If you view the source, you will note that we are forcing the server to re-cache the list of songs from Harmonix on every request.  This is generally not recommended, but is done here to show that as soon as harmonix updates their site, forcing a recache automatically updates the song list the API provides.  If you did not force this recache, it would use the last cached version (which is cached once per calendar day, when the first request of the day is made)</p>
+    <h3>Total Songs: <span></span></h3>
+    
+    <div id="loading" style="display: none">Loading...</div>
+    <div id="content" sytle="display: none">
+    
+    </div>
+  </body>
+</html>
