@@ -36,6 +36,15 @@ HMXSongs = function(obj) {
         }
     };    
 
+
+    /*Method invoked by the server when the user doesn't submit a callback (or something goes terribly wrong)
+    This should never happen, as the API shouldn't let you submit a request without a callback, but who knows.
+    */
+    this.callbackErrorHandler = function(obj) {
+      if (debug) {
+        console.log('Error:  Server did not receive a callback property.')
+      }
+    }
     
     /*Internal interface with JSONscriptRequest to make json call*/
     var makeJSON = function(obj) {
